@@ -28,6 +28,10 @@ class MonEvent(BaseEvent):
         super(MonEvent, self).__init__('monster')
         check_for_none = BaseEvent.check_for_none
 
+        # Shiny checking
+        self.username = data.get('username', Unknown.REGULAR)
+        self.shiny = data.get('shiny')
+
         # Identification
         self.enc_id = data['encounter_id']
         self.monster_id = int(data['pokemon_id'])
@@ -219,6 +223,10 @@ class MonEvent(BaseEvent):
 
         dts = self.custom_dts.copy()
         dts.update({
+            # Shiny checking
+            'username': self.username,
+            'shiny': self.shiny,
+
             # Identification
             'encounter_id': self.enc_id,
             'mon_name': locale.get_pokemon_name(self.monster_id),

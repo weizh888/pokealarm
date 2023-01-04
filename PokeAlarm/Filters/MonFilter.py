@@ -219,6 +219,19 @@ class MonFilter(BaseFilter):
         self.is_missing_info = BaseFilter.parse_as_type(
             bool, 'is_missing_info', data)
 
+        # Shiny
+        def is_shiny(desired_status, shiny):
+            if desired_status is True and shiny != 0 and shiny is not None:
+                return True
+            if desired_status is False and (shiny == 0 or shiny is None):
+                return True
+            return False
+
+        self.shiny = self.evaluate_attribute(
+            event_attribute='shiny',
+            eval_func=is_shiny,
+            limit=BaseFilter.parse_as_type(bool, 'shiny', data))
+
         # Reject leftover parameters
         for key in data:
             raise ValueError("'{}' is not a recognized parameter for"
@@ -227,6 +240,10 @@ class MonFilter(BaseFilter):
     def to_dict(self):
         """ Create a dict representation of this Filter. """
         settings = {}
+        # Shiny
+        if self.shiny is not None:
+            settings['shiny'] = self.shiny
+
         # Monster ID
         if self.monster_ids is not None:
             settings['monster_ids'] = self.monster_ids
