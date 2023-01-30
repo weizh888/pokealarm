@@ -89,7 +89,7 @@ class Alarm(object):
         """Pops a parameter as a certain type."""
         try:
             value = data.pop(param_name, default)
-            return kind(value)
+            return kind(value) if value is not None else value
         except Exception:
             raise ValueError(
                 'Unable to interpret the value "{}" as a valid {} '
