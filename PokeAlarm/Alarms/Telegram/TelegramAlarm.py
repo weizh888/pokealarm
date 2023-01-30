@@ -241,7 +241,7 @@ class TelegramAlarm(Alarm):
         bot_token = replace(alert.bot_token, dts)
         chat_id = replace(alert.chat_id, dts)
         message = replace(alert.message, dts)
-        message_thread_id = dts["message_thread_id"]
+        message_thread_id = alert.message_thread_id
         lat, lng = dts["lat"], dts["lng"]
         max_attempts = alert.max_attempts
         sticker_url = replace(alert.sticker_url, dts)
