@@ -27,6 +27,7 @@ class TelegramAlarm(Alarm):
         [
             "bot_token",
             "chat_id",
+            "message_thread_id",
             "sticker",
             "sticker_url",
             "sticker_notify",
@@ -113,6 +114,7 @@ class TelegramAlarm(Alarm):
         alert_defaults = {
             "bot_token": self._bot_token,
             "chat_id": self._chat_id,
+            "message_thread_id": self.pop_type(settings, "message_thread_id", int, None),
             "sticker": self.pop_type(settings, "sticker", utils.parse_bool, True),
             "sticker_notify": self.pop_type(
                 settings, "sticker_notify", utils.parse_bool, False
@@ -186,6 +188,7 @@ class TelegramAlarm(Alarm):
         alert = TelegramAlarm.Alert(
             bot_token=Alarm.pop_type(settings, "bot_token", str, default["bot_token"]),
             chat_id=Alarm.pop_type(settings, "chat_id", str, default["chat_id"]),
+            message_thread_id=Alarm.pop_type(settings, "message_thread_id", int, default["message_thread_id"]),
             sticker=Alarm.pop_type(
                 settings, "sticker", utils.parse_bool, default["sticker"]
             ),
@@ -238,27 +241,28 @@ class TelegramAlarm(Alarm):
         bot_token = replace(alert.bot_token, dts)
         chat_id = replace(alert.chat_id, dts)
         message = replace(alert.message, dts)
+        message_thread_id = replace(alert.message_thread_id, dts)
         lat, lng = dts["lat"], dts["lng"]
         max_attempts = alert.max_attempts
         sticker_url = replace(alert.sticker_url, dts)
         self._log.debug(sticker_url)
         # Send Sticker
         if alert.sticker and sticker_url is not None:
-            self.send_sticker(bot_token, chat_id, sticker_url, max_attempts)
+            self.send_sticker(bot_token, chat_id, sticker_url, message_thread_id, max_attempts)
 
         # Send Venue
         if alert.venue:
-            self.send_venue(bot_token, chat_id, lat, lng, message, max_attempts)
+            self.send_venue(bot_token, chat_id, lat, lng, message, message_thread_id, max_attempts)
             return  # Don't send message or map
 
         # Send Message
         self.send_message(
-            bot_token, chat_id, replace(message, dts), web_preview=alert.web_preview
+            bot_token, chat_id, replace(message, dts), message_thread_id, web_preview=alert.web_preview
         )
 
         # Send Map
         if alert.map:
-            self.send_location(bot_token, chat_id, lat, lng, max_attempts)
+            self.send_location(bot_token, chat_id, lat, lng, message_thread_id, max_attempts)
 
     # Trigger an alert based on Pokemon info
     def pokemon_alert(self, mon_dts):
@@ -290,11 +294,12 @@ class TelegramAlarm(Alarm):
     def invasion_alert(self, invasion_dts):
         self.generic_alert(self._invasion_alert, invasion_dts)
 
-    def send_sticker(self, token, chat_id, sticker_url, max_attempts=3, notify=False):
+    def send_sticker(self, token, chat_id, sticker_url, message_thread_id=None, max_attempts=3, notify=False):
         args = {
             "url": "https://api.telegram.org/bot{}/sendSticker".format(token),
             "payload": {
                 "chat_id": chat_id,
+                "message_thread_id": message_thread_id,
                 "sticker": sticker_url,
                 "disable_notification": not notify,
             },
@@ -309,12 +314,13 @@ class TelegramAlarm(Alarm):
         )
 
     def send_message(
-        self, token, chat_id, message, max_attempts=3, notify=True, web_preview=False
+        self, token, chat_id, message, message_thread_id=None, max_attempts=3, notify=True, web_preview=False
     ):
         args = {
             "url": "https://api.telegram.org/bot{}/sendMessage".format(token),
             "payload": {
                 "chat_id": chat_id,
+                "message_thread_id": message_thread_id,
                 "text": message,
                 "parse_mode": "Markdown",
                 "disable_web_page_preview": not web_preview,
@@ -330,11 +336,12 @@ class TelegramAlarm(Alarm):
             max_attempts,
         )
 
-    def send_location(self, token, chat_id, lat, lng, max_attempts=3, notify=False):
+    def send_location(self, token, chat_id, lat, lng, message_thread_id, max_attempts=3, notify=False):
         args = {
             "url": "https://api.telegram.org/bot{}/sendLocation".format(token),
             "payload": {
                 "chat_id": chat_id,
+                "message_thread_id": message_thread_id,
                 "latitude": lat,
                 "longitude": lng,
                 "disable_notification": not notify,
@@ -349,12 +356,13 @@ class TelegramAlarm(Alarm):
             max_attempts,
         )
 
-    def send_venue(self, token, chat_id, lat, lng, message, max_attempts):
+    def send_venue(self, token, chat_id, lat, lng, message, message_thread_id, max_attempts):
         msg = message.split("\n", 1)
         args = {
             "url": "https://api.telegram.org/bot{}/sendVenue".format(token),
             "payload": {
                 "chat_id": chat_id,
+                "message_thread_id": message_thread_id,
                 "latitude": lat,
                 "title": msg[0],
                 "address": msg[1] if len(msg) > 1 else "",
