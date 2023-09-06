@@ -164,10 +164,11 @@ class MonEvent(BaseEvent):
         )
         self.height = check_for_none(float, data.get("height"), Unknown.SMALL)
         self.weight = check_for_none(float, data.get("weight"), Unknown.SMALL)
-        if Unknown.is_not(self.height, self.weight):
-            self.size_id = get_pokemon_size(self.monster_id, self.height, self.weight)
-        else:
-            self.size_id = Unknown.SMALL
+        self.size_id = check_for_none(float, data.get("size"), Unknown.SMALL)
+        # if Unknown.is_not(self.height, self.weight):
+        #     self.size_id = get_pokemon_size(self.monster_id, self.height, self.weight)
+        # else:
+        #     self.size_id = Unknown.SMALL
 
         self.types = get_base_types(self.monster_id, self.form_id)
         self.can_be_shiny = MonUtils.get_shiny_status(self.monster_id, self.form_id)
@@ -314,7 +315,7 @@ class MonEvent(BaseEvent):
                 "boosted_weather_emoji": get_weather_emoji(self.boosted_weather_id),
                 "boosted_or_empty": locale.get_boosted_text()
                 if Unknown.is_not(self.boosted_weather_id)
-                and self.boosted_weather_id != 0
+                   and self.boosted_weather_id != 0
                 else "",
                 # Encounter Stats
                 "mon_lvl": self.mon_lvl,
@@ -369,7 +370,7 @@ class MonEvent(BaseEvent):
                 "great_cp": self.great_cp,
                 "great_level": str(self.great_level),
                 "great_url": "https://www.stadiumgaming.gg/rank-checker?"
-                + urlencode(
+                             + urlencode(
                     {
                         "pokemon": re.sub(
                             r"[^A-Za-z0-9\s]+",
@@ -391,15 +392,15 @@ class MonEvent(BaseEvent):
                         "",
                         locale.get_english_pokemon_name(self.great_id),
                     )
-                    .lower()
-                    .replace(" ", "_"),
+                        .lower()
+                        .replace(" ", "_"),
                     "_"
                     + re.sub(
                         r"[^A-Za-z0-9\s]+",
                         "",
                         locale.get_english_form_name(self.great_id, self.form_id)
-                        .lower()
-                        .replace(" ", "_"),
+                            .lower()
+                            .replace(" ", "_"),
                     )
                     if not any(
                         x in locale.get_english_form_name(self.great_id, self.form_id)
@@ -415,7 +416,7 @@ class MonEvent(BaseEvent):
                 "ultra_cp": self.ultra_cp,
                 "ultra_level": str(self.ultra_level),
                 "ultra_url": "https://www.stadiumgaming.gg/rank-checker?"
-                + urlencode(
+                             + urlencode(
                     {
                         "pokemon": re.sub(
                             r"[^A-Za-z0-9\s]+",
@@ -437,15 +438,15 @@ class MonEvent(BaseEvent):
                         "",
                         locale.get_english_pokemon_name(self.ultra_id),
                     )
-                    .lower()
-                    .replace(" ", "_"),
+                        .lower()
+                        .replace(" ", "_"),
                     "_"
                     + re.sub(
                         r"[^A-Za-z0-9\s]+",
                         "",
                         locale.get_english_form_name(self.ultra_id, self.form_id)
-                        .lower()
-                        .replace(" ", "_"),
+                            .lower()
+                            .replace(" ", "_"),
                     )
                     if not any(
                         x in locale.get_english_form_name(self.ultra_id, self.form_id)
@@ -478,7 +479,7 @@ class MonEvent(BaseEvent):
                 "nonnormal_form_or_empty": (
                     ""
                     if locale.get_english_form_name(self.monster_id, self.form_id)
-                    == "Normal"
+                       == "Normal"
                     else Unknown.or_empty(form_name)
                 ),
                 "form_id": self.form_id,
@@ -617,15 +618,15 @@ class MonEvent(BaseEvent):
                 "big_karp": (
                     "big"
                     if self.monster_id == 129
-                    and Unknown.is_not(self.weight)
-                    and self.weight >= 13.13
+                       and Unknown.is_not(self.weight)
+                       and self.weight >= 13.13
                     else ""
                 ),
                 "tiny_rat": (
                     "tiny"
                     if self.monster_id == 19
-                    and Unknown.is_not(self.weight)
-                    and self.weight <= 2.41
+                       and Unknown.is_not(self.weight)
+                       and self.weight <= 2.41
                     else ""
                 ),
             }
